@@ -7,6 +7,11 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::ApiResource('customers', \App\Http\Controllers\CustomerController::class);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::ApiResource('customers', \App\Http\Controllers\CustomerController::class);
+
+});
+
+
 
 require __DIR__.'/auth.php';

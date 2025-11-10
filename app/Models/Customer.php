@@ -20,6 +20,12 @@ class Customer extends Model
         'phone_number',
     ];
 
+    protected $hidden = [
+        'user_id',
+        'address_id',
+        'deleted_at',
+    ];
+
     public function user() : BelongsTo
     {
         return $this->belongsTo(User::class);

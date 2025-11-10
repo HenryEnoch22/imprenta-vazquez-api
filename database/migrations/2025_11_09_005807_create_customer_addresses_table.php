@@ -19,10 +19,11 @@ return new class extends Migration
             $table->string('federal_entity', 100);
             $table->string('neighborhood', 64);
             $table->string('municipality', 64);
-            $table->string('between_streets', 100)->nullable(false);
-            $table->string('interior_number', 10)->nullable(true);
-            $table->string('exterior_number', 10)->nullable(false);
+            $table->string('between_streets', 100);
+            $table->string('interior_number', 10)->nullable();
+            $table->string('exterior_number', 10);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
