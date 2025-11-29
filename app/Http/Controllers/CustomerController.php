@@ -38,14 +38,14 @@ class CustomerController extends Controller
            ]);
 
            $customerAddress = CustomerAddress::create([
-               'postal_code' => $data['postal_code'],
+                'postal_code' => $data['postal_code'],
                 'address' => $data['address'],
                 'locality_name' => $data['locality_name'],
                 'federal_entity' => $data['federal_entity'],
                 'neighborhood' => $data['neighborhood'],
                 'municipality' => $data['municipality'],
                 'between_streets' => $data['between_streets'],
-                'interior_number' => $data['interior_number'],
+                'interior_number' => $data['interior_number'] ?? null,
                 'exterior_number' => $data['exterior_number'],
            ]);
 
@@ -58,7 +58,6 @@ class CustomerController extends Controller
                 'phone_number' => $data['phone_number'],
             ]);
         });
-
 
         return response()->json(['message' => 'Cliente creado exitosamente'], 201);
     }

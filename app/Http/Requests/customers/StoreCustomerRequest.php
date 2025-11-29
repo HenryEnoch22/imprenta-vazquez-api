@@ -31,11 +31,11 @@ class StoreCustomerRequest extends FormRequest
             // Campos del cliente
             'business_name' => ['required', 'string', 'max:150'],
             'representative_name' => ['nullable', 'string', 'max:100'],
-            'rfc' => ['required', 'string', 'size:13', 'regex:/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/i'],
-            'phone_number' => ['required', 'string', 'max:15', 'regex:/^[0-9+\-\s()]+$/'],
+            'rfc' => ['required', 'string', 'size:13'],
+            'phone_number' => ['required', 'string', 'max:15'],
 
             // --- Dirección del cliente ---
-            'postal_code' => ['required', 'string', 'size:5', 'regex:/^\d{5}$/'], // C.P. mexicano
+            'postal_code' => ['required', 'string', 'size:5'], // C.P. mexicano
             'address' => ['required', 'string', 'max:255'],
             'locality_name' => ['required', 'string', 'max:100'],
             'federal_entity' => ['required', 'string', 'max:100'],
@@ -65,12 +65,9 @@ class StoreCustomerRequest extends FormRequest
             // --- Cliente ---
             'business_name.required' => 'El nombre comercial es obligatorio.',
             'representative_name.required' => 'El nombre del representante es obligatorio.',
-            'rfc.regex' => 'El RFC no tiene un formato válido.',
-            'phone_number.regex' => 'El número de teléfono solo puede contener números y símbolos válidos.',
 
             // --- Dirección ---
             'address.postal_code.required' => 'El código postal es obligatorio.',
-            'address.postal_code.regex' => 'El código postal debe tener 5 dígitos.',
             'address.address.required' => 'La calle o dirección es obligatoria.',
             'address.locality_name.required' => 'La localidad es obligatoria.',
             'address.federal_entity.required' => 'La entidad federativa es obligatoria.',

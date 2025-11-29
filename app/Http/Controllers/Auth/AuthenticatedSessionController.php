@@ -16,6 +16,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request) : JsonResponse
     {
+        \Log::info([
+            'msg' => 'Intento de inicio de sesión',
+            'username' => $request->input('username'),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
         $data = $request->validated();
 
         if (!Auth::attempt(

@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('print_job_requests', function (Blueprint $table) {
+        Schema::create('print_job_payment', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
-            $table->foreignId('type_receipt_id')->constrained('type_receipts')->onDelete('cascade');
+            $table->foreignId('print_job_request_id')->constrained('print_job_requests')->onDelete('cascade');
+            $table->integer('payment_method');
+            $table->decimal('amount', 7, 2);
+            $table->date('paid_at');
+            $table->text('file_path')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('print_job_requests');
+        Schema::dropIfExists('print_job_payment');
     }
 };

@@ -60,6 +60,14 @@ return [
             'report' => false,
         ],
 
+        'print-files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/print-files'),
+            'url' => env('APP_URL').'/print-files',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
     ],
 
     /*
@@ -75,6 +83,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('print-files') => storage_path('app/print-files'),
     ],
 
 ];
