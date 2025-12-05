@@ -16,12 +16,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request) : JsonResponse
     {
-        \Log::info([
-            'msg' => 'Intento de inicio de sesión',
-            'username' => $request->input('username'),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
         $data = $request->validated();
 
         if (!Auth::attempt(
@@ -33,6 +27,21 @@ class AuthenticatedSessionController extends Controller
         }
 
         $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'Usuario no encontrado'
+            ], 404);
+        }
+
+        if (!$user->is_admin && !$user->customer) {
+            return response()->json([
+                'message' => 'El usuario no está asociado a ningún cliente'
+            ], 403);
+        }
+
+        if (!$user->is_admin) {
+            $user->load('customer.customerAddress');
+        }
 
         // Eliminar tokens existentes (opcional)
         $user->tokens()->delete();

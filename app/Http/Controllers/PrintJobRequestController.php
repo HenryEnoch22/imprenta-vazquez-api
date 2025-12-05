@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChangeStatusPrintJobRequest;
 use App\Http\Requests\StorePrintJobRequest;
 use App\Http\Requests\UpdatePrintJobRequest;
 use App\Models\PrintJobRequest;
@@ -15,18 +16,14 @@ class PrintJobRequestController extends Controller
      */
     public function index()
     {
-        $printJobs = PrintJobRequest::with(['customer', 'typeReceipt'])->get();
-        \Log::info([
-            'msg' => 'Listando solicitudes de impresión',
-            'user_id' => Auth::id(),
-            'datos' => $printJobs,
-        ]);
-//        $printJobs->each(function ($job) {
-//            $job->load(['customer']);
-//            $job->category = PrintJobRequest::$categories[$job->category_id] ?? 'Sin categoria';
-//            $job->paper_size = PrintJobRequest::$paperSizes[$job->paper_size] ?? 'No definido';
-//            $job->paper_type = PrintJobRequest::$paperTypes[$job->paper_type] ?? 'No definido';
-//        });
+        $user = Auth::user();
+        if ($user->is_admin) {
+            $printJobs = PrintJobRequest::with(['customer', 'typeReceipt'])->get();
+        } else {
+            $printJobs = PrintJobRequest::with(['customer', 'typeReceipt'])
+                ->where('customer_id', $user->customer->id)
+                ->get();
+        }
 
         return response()->json($printJobs);
     }
@@ -94,44 +91,72 @@ class PrintJobRequestController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePrintJobRequest $request, $printJobRequest)
+    public function update(UpdatePrintJobRequest $request, $printJob)
     {
-        \Log::info([
-            'msg' => 'Actualizando solicitud de impresión',
-            'user_id' => Auth::id(),
-            'print_job_request_id' => $printJobRequest,
-            'datos' => $request->all(),
-        ]);
         $validated = $request->validated();
+        $printJob = PrintJobRequest::findOrFail($printJob);
 
-        $printJobRequest = PrintJobRequest::findOrFail($printJobRequest);
-        if ($printJobRequest->status == 1) {
+        $user = Auth::user();
 
-            if ($request->hasFile('file_path')) {
-                // Eliminar el archivo anterior si existe
-                if ($printJobRequest->file_path && Storage::disk('print-files')->exists($printJobRequest->file_path)) {
-                    Storage::disk('print-files')->delete($printJobRequest->file_path);
-                }
-
-                $file = $request->file('file_path');
-                $path = Storage::disk('print-files')->putFileAs(
-                    '',
-                    $request->file('file_path'),
-                    time().'_'.$file->getClientOriginalName()
-                );
-                $validated['file_path'] = $path;
-            }
-            $printJobRequest->update($validated);
-
+        // ADMIN NO EDITA CONTENIDO, SOLO ESTADOS
+        if ($user->is_admin) {
             return response()->json([
-                'message' => 'Solicitud de impresión actualizada exitosamente.',
-                'data' => $printJobRequest,
-            ], 200);
+                'message' => 'Un administrador no puede modificar el contenido de la solicitud.',
+            ], 403);
         }
 
+        // Validar solo editar su propia solicitud
+        if (!$user->customer || $printJob->customer_id != $user->customer->id) {
+            return response()->json([
+                'message' => 'No autorizado para modificar esta solicitud de impresión.',
+            ], 403);
+        }
+
+        // Validar si el cliente puede editarla
+        if (!$this->canClientEdit($printJob)) {
+            return response()->json([
+                'message' => 'No se puede editar una solicitud en este estado.',
+            ], 400);
+        }
+
+        // Cambios de estado automáticos para clientes
+        if ($printJob->status == 5) {
+            $printJob->status = 2; // pasa a "esperando aceptación"
+        }
+
+        if ($request->hasFile('file_path')) {
+            if ($printJob->file_path && Storage::disk('print-files')->exists($printJob->file_path)) {
+                Storage::disk('print-files')->delete($printJob->file_path);
+            }
+
+            $file = $request->file('file_path');
+            $path = Storage::disk('print-files')->putFileAs(
+                '',
+                $file,
+                time().'_'.$file->getClientOriginalName()
+            );
+
+            $validated['file_path'] = $path;
+        }
+
+        $printJob->update([
+            'name' => $validated['name'],
+            'type_receipt_id' => $validated['type_receipt_id'],
+            'description' => $validated['description'],
+            'folio' => $validated['folio'],
+            'paper_size' => $validated['paper_size'],
+            'copies_number' => $validated['copies_number'],
+            'copies_colors' => $validated['copies_colors'],
+            'tint_colors' => $validated['tint_colors'],
+            'paper_type' => $validated['paper_type'],
+            'quantity' => $validated['quantity'],
+            'file_path' => $validated['file_path'] ?? $printJob->file_path,
+        ]);
+
         return response()->json([
-            'message' => 'No se puede actualizar una solicitud de impresión que no está en estado "Solicitada".',
-        ], 400);
+            'message' => 'Solicitud actualizada exitosamente.',
+            'data' => $printJob,
+        ]);
     }
 
     /**
@@ -145,5 +170,122 @@ class PrintJobRequestController extends Controller
         return response()->json([
             'message' => 'Solicitud de impresión eliminada exitosamente.',
         ], 200);
+    }
+
+    /**
+     * Change status of a specified print job request.
+     */
+    public function changeStatus(ChangeStatusPrintJobRequest $request, $printJobRequestId)
+    {
+        $validated = $request->validated();
+        $printJobRequest = PrintJobRequest::findOrFail($printJobRequestId);
+        $newStatus = $validated['status'];
+
+        $user = Auth::user();
+
+        // CLIENTES NO PUEDEN CAMBIAR ESTADOS
+        if (!$user->is_admin) {
+            return response()->json([
+                'message' => 'Un cliente no puede cambiar el estado de la solicitud.',
+            ], 403);
+        }
+
+        // ADMIN NO PUEDE EDITAR TERMINADAS O RECHAZADAS
+        if (!$this->canAdminEdit($printJobRequest->status)) {
+            return response()->json([
+                'message' => 'No se puede editar esta solicitud en su estado actual.',
+            ], 400);
+        }
+
+        // VALIDAR TRANSICION
+        if (! $this->isValidTransition($printJobRequest->status, $newStatus)) {
+            return response()->json([
+                'message' => 'La transición de estado no es válida.',
+            ], 400);
+        }
+
+        $printJobRequest->status = $newStatus;
+
+        // SI ES RECHAZADA, GUARDAR RAZÓN
+        if ($newStatus == 5) {
+            $printJobRequest->reason_rejection = $validated['reason_rejection'] ?? null;
+        }
+
+        $printJobRequest->save();
+
+        return response()->json([
+            'message' => 'Estado actualizado exitosamente.',
+            'data' => $printJobRequest,
+        ], 200);
+    }
+
+    /**
+     * @var int[][] $adminTransitions Mapa de transiciones de estado permitidas para administradores.
+     */
+    private $adminTransitions = [
+        1 => [3, 5], // solicitada → en proceso o rechazada
+        2 => [3, 5], // esperando aceptación → en proceso o rechazada
+        3 => [4],    // en proceso → terminada
+    ];
+
+    /**
+     * @param int $job
+     * @return bool Indica si un administrador puede editar la solicitud de impresión dada.
+     */
+    private function canAdminEdit($job): bool
+    {
+        return isset($this->adminTransitions[$job]);
+    }
+
+    /**
+     * @param PrintJobRequest $job
+     * @return bool Indica si un cliente puede editar la solicitud de impresión dada.
+     */
+
+    private function canClientEdit(PrintJobRequest $job): bool
+    {
+        return in_array($job->status, [1, 2, 5]);
+    }
+
+    /**
+     * @param int $from Estado actual.
+     * @param int $to Estado al que se desea cambiar.
+     * @return bool Indica si la transición de estado es válida.
+     */
+    private function isValidTransition($from, $to): bool
+    {
+        return isset($this->adminTransitions[$from])
+            && in_array($to, $this->adminTransitions[$from]);
+    }
+
+    /**
+     * Reject a specified print job request.
+     */
+    public function reject(ChangeStatusPrintJobRequest $request)
+    {
+        $validated = $request->validated();
+        $printJobRequest = PrintJobRequest::findOrFail($validated['print_job_request_id']);
+        if ($printJobRequest->status != 1) { // 1 es "solicitada"
+            return response()->json([
+                'message' => 'No se puede rechazar una solicitud de impresión que no está en estado "Solicitada".',
+            ], 400);
+        }
+
+        if (!Auth::user()->is_admin) {
+            return response()->json([
+                'message' => 'Usuario no autorizado para rechazar solicitudes de impresión.',
+            ], 403);
+        }
+
+        $printJobRequest->update([
+            'status' => 5, // rechazado
+            'reason_rejection' => $validated['reason_rejection'],
+        ]);
+
+        return response()->json([
+            'message' => 'Solicitud de impresión rechazada exitosamente.',
+            'data' => $printJobRequest,
+        ], 200);
+
     }
 }

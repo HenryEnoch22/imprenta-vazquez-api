@@ -67,12 +67,12 @@ class StoreCustomerRequest extends FormRequest
             'representative_name.required' => 'El nombre del representante es obligatorio.',
 
             // --- Dirección ---
-            'address.postal_code.required' => 'El código postal es obligatorio.',
-            'address.address.required' => 'La calle o dirección es obligatoria.',
-            'address.locality_name.required' => 'La localidad es obligatoria.',
-            'address.federal_entity.required' => 'La entidad federativa es obligatoria.',
-            'address.neighborhood.required' => 'La colonia o barrio es obligatoria.',
-            'address.municipality.required' => 'El municipio es obligatorio.',
+            'postal_code.required' => 'El código postal es obligatorio.',
+            'address.required' => 'La calle o dirección es obligatoria.',
+            'locality_name.required' => 'La localidad es obligatoria.',
+            'federal_entity.required' => 'La entidad federativa es obligatoria.',
+            'neighborhood.required' => 'La colonia o barrio es obligatoria.',
+            'municipality.required' => 'El municipio es obligatorio.',
         ];
     }
 }

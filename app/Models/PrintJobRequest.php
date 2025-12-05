@@ -24,6 +24,7 @@ class PrintJobRequest extends Model
         'paper_type',
         'quantity',
         'status',
+        'reason_rejection',
         'created_at',
         'updated_at',
     ];
@@ -73,6 +74,7 @@ class PrintJobRequest extends Model
         2 => 'Esperando aceptacion',
         3 => 'En proceso',
         4 => 'Terminada',
+        5 => 'Rechazada'
     ];
 
     public function customer()
