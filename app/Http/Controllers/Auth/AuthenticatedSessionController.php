@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -66,9 +67,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): JsonResponse
     {
-        // Revocar el token actual
-        if ($request->user()) {
-            $request->user()->currentAccessToken()->delete();
+        if ($user = $request->user()) {
+            // Revocar TODOS los tokens del usuario
+            $user->tokens()->delete();
         }
 
         return response()->json(['message' => 'Logged out successfully']);
