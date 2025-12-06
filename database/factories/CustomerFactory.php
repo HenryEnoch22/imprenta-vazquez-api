@@ -22,7 +22,7 @@ class CustomerFactory extends Factory
             'business_name' => $this->faker->company(),
             'representative_name' => $this->faker->name(),
             'rfc' => $this->faker->bothify('????######???'),
-            'phone_number' => $this->faker->phoneNumber(),
+            'phone_number' => $this->faker->numerify('##############'),
         ];
     }
 }

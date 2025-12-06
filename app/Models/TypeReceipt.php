@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TypeReceipt extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasFactory;
     protected $table = 'type_receipts';
     protected $fillable  = [
-        'type_receipt_category_id',
         'name',
         'description',
+        'receipt_category',
         'created_at',
         'updated_at',
     ];
 
     public static $categories = [
-        1 => 'Impresión',
-        2 => 'Varios',
+        'Impresión',
+        'Varios',
     ];
 }
