@@ -31,7 +31,7 @@ class StoreCustomerRequest extends FormRequest
             // Campos del cliente
             'business_name' => ['required', 'string', 'max:150'],
             'representative_name' => ['nullable', 'string', 'max:100'],
-            'rfc' => ['required', 'string', 'size:13'],
+            'rfc' => ['required', 'unique:customers,rfc', 'string', 'size:13'],
             'phone_number' => ['required', 'string', 'max:15'],
 
             // --- Dirección del cliente ---
@@ -68,6 +68,7 @@ class StoreCustomerRequest extends FormRequest
 
             // --- Dirección ---
             'postal_code.required' => 'El código postal es obligatorio.',
+            'postal_code.size' => 'El código postal debe tener 5 caracteres.',
             'address.required' => 'La calle o dirección es obligatoria.',
             'locality_name.required' => 'La localidad es obligatoria.',
             'federal_entity.required' => 'La entidad federativa es obligatoria.',

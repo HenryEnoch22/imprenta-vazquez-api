@@ -39,6 +39,10 @@ class TypeReceiptController extends Controller
     {
         $data = $request->validated();
 
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
+
         $typeReceipt = TypeReceipt::create([
             'type_receipt_category_id' => $data['type_receipt_category_id'],
             'name' => $data['name'],
@@ -75,6 +79,10 @@ class TypeReceiptController extends Controller
     public function update(UpdateTypeReceiptRequest $request, $typeReceipt)
     {
         $data = $request->validated();
+
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
 
         $typeReceiptModel = TypeReceipt::findOrFail($typeReceipt);
         $typeReceiptModel->update([

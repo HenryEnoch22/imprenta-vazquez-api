@@ -18,7 +18,12 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::all();
+        $customers = Customer::with('customerAddress', 'user')->get();
+
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
+
         return response()->json(['data' => $customers], 200);
     }
 
@@ -28,7 +33,12 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
+        $user = $request->user();
         $data = $request->validated();
+
+        if($user && !$user->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
 
         DB::transaction(function () use ($data) {
            $user = User::create([
@@ -69,6 +79,10 @@ class CustomerController extends Controller
     {
         $customer = Customer::with('customerAddress', 'user')->find($customerId);
 
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
+
         if (!$customer) {
             return response()->json(['message' => 'Cliente no encontrado'], 404);
         }
@@ -83,6 +97,10 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, $customerId)
     {
         $data = $request->validated();
+
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
 
         $customer = Customer::with('customerAddress')->find($customerId);
 
@@ -120,6 +138,11 @@ class CustomerController extends Controller
     public function destroy(string $customerId)
     {
         $customer = Customer::with('user', 'customerAddress')->find($customerId);
+
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
+
         if (!$customer) {
             return response()->json(['message' => 'Cliente no encontrado'], 404);
         }
