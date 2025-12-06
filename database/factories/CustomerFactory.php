@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\CustomerAddress;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,8 +19,8 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-//            'user_id',
-//            'address_id',
+            'user_id' => User::factory(),
+            'address_id' => CustomerAddress::factory(),
             'business_name' => $this->faker->company(),
             'representative_name' => $this->faker->name(),
             'rfc' => $this->faker->bothify('????######???'),

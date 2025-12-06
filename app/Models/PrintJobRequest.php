@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PrintJobRequest extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, hasFactory;
     protected $table = 'print_job_requests';
     protected $fillable = [
         'customer_id',
         'type_receipt_id',
         'name',
-        'category_id',
         'file_path',
         'description',
         'folio',
