@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('print_job_requests', function (Blueprint $table) {
-            $table->string('reason_rejection', 1000)->nullable()->after('status');
+            $table->string('reason_rejection', 1000)->nullable()->after('estimated_date');
         });
     }
 

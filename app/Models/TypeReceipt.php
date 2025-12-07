@@ -10,7 +10,7 @@ class TypeReceipt extends Model
     use SoftDeletes;
     protected $table = 'type_receipts';
     protected $fillable  = [
-        'type_receipt_category_id',
+        'receipt_category_id',
         'name',
         'description',
         'created_at',
