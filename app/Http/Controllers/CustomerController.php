@@ -18,7 +18,12 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::all();
+        $customers = Customer::with('customerAddress', 'user')->get();
+
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
+
         return response()->json(['data' => $customers], 200);
     }
 
@@ -28,7 +33,12 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
+        $user = $request->user();
         $data = $request->validated();
+
+        if($user && !$user->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
 
         DB::transaction(function () use ($data) {
            $user = User::create([
@@ -67,13 +77,23 @@ class CustomerController extends Controller
      */
     public function show($customerId)
     {
-        $customer = Customer::with('customerAddress', 'user')->find($customerId);
+        try{
+            $customer = Customer::with('customerAddress', 'user')->findOrFail($customerId);
 
-        if (!$customer) {
-            return response()->json(['message' => 'Cliente no encontrado'], 404);
+            if(auth()->user() && !auth()->user()->is_admin){
+                return response()->json(['message' => 'Usuario no autorizado'], 403);
+            }
+
+            if (!$customer) {
+                return response()->json(['message' => 'Cliente no encontrado'], 404);
+            }
+
+            return response()->json(['data' => $customer], 200);
+
+        }catch (\Exception $e){
+            return response()->json(['message' => 'Error al obtener el cliente'], 500);
         }
 
-        return response()->json(['data' => $customer], 200);
     }
 
 
@@ -82,36 +102,46 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, $customerId)
     {
-        $data = $request->validated();
+        try{
+            $data = $request->validated();
 
-        $customer = Customer::with('customerAddress')->find($customerId);
+            if(auth()->user() && !auth()->user()->is_admin){
+                return response()->json(['message' => 'Usuario no autorizado'], 403);
+            }
 
-        if (!$customer) {
-            return response()->json(['message' => 'Cliente no encontrado'], 404);
+            $customer = Customer::with('customerAddress')->findOrFail($customerId);
+
+            if (!$customer) {
+                return response()->json(['message' => 'Cliente no encontrado'], 404);
+            }
+
+            DB::transaction(function () use ($customer, $data){
+                $customer->update([
+                    'business_name' => $data['business_name'] ,
+                    'representative_name' => $data['representative_name'] ?? null,
+                    'rfc' => $data['rfc'],
+                    'phone_number' => $data['phone_number'],
+                ]);
+
+                $customer->customerAddress->update([
+                    'postal_code' => $data['postal_code'],
+                    'address' => $data['address'],
+                    'locality_name' => $data['locality_name'],
+                    'federal_entity' => $data['federal_entity'],
+                    'neighborhood' => $data['neighborhood'],
+                    'municipality' => $data['municipality'],
+                    'between_streets' => $data['between_streets'],
+                    'interior_number' => $data['interior_number'] ?? null,
+                    'exterior_number' => $data['exterior_number'],
+                ]);
+            });
+
+            return response()->json(['message' => 'Cliente actualizado exitosamente'], 200);
+
+        }catch (\Exception $e){
+            return response()->json(['message' => 'Error al actualizar el cliente'], 500);
         }
 
-        DB::transaction(function () use ($customer, $data){
-            $customer->update([
-                'business_name' => $data['business_name'] ,
-                'representative_name' => $data['representative_name'] ?? null,
-                'rfc' => $data['rfc'],
-                'phone_number' => $data['phone_number'],
-            ]);
-
-            $customer->customerAddress->update([
-                'postal_code' => $data['postal_code'],
-                'address' => $data['address'],
-                'locality_name' => $data['locality_name'],
-                'federal_entity' => $data['federal_entity'],
-                'neighborhood' => $data['neighborhood'],
-                'municipality' => $data['municipality'],
-                'between_streets' => $data['between_streets'],
-                'interior_number' => $data['interior_number'] ?? null,
-                'exterior_number' => $data['exterior_number'],
-            ]);
-        });
-
-        return response()->json(['message' => 'Cliente actualizado exitosamente'], 200);
     }
 
     /**
@@ -119,17 +149,28 @@ class CustomerController extends Controller
      */
     public function destroy(string $customerId)
     {
-        $customer = Customer::with('user', 'customerAddress')->find($customerId);
-        if (!$customer) {
-            return response()->json(['message' => 'Cliente no encontrado'], 404);
+        try{
+            $customer = Customer::with('user', 'customerAddress')->findOrFail($customerId);
+
+            if(auth()->user() && !auth()->user()->is_admin){
+                return response()->json(['message' => 'Usuario no autorizado'], 403);
+            }
+
+            if (!$customer) {
+                return response()->json(['message' => 'Cliente no encontrado'], 404);
+            }
+
+            DB::transaction(function () use ($customer) {
+                $customer->customerAddress->delete();
+                $customer->user->delete();
+                $customer->delete();
+            });
+
+            return response()->json(['message' => 'Cliente eliminado exitosamente'], 200);
+
+        }catch (\Exception $e){
+            return response()->json(['message' => 'Error al eliminar el cliente'], 500);
         }
 
-        DB::transaction(function () use ($customer) {
-            $customer->customerAddress->delete();
-            $customer->user->delete();
-            $customer->delete();
-        });
-
-        return response()->json(['message' => 'Cliente eliminado exitosamente'], 200);
     }
 }

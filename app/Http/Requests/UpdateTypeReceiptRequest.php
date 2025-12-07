@@ -22,7 +22,7 @@ class UpdateTypeReceiptRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type_receipt_category_id' => 'required|integer|min:0|max:'.(count(\App\Models\TypeReceipt::$categories) - 1),
+            'receipt_category' => 'required|in:'. implode(',', \App\Models\TypeReceipt::$categories),
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ];
@@ -36,10 +36,8 @@ class UpdateTypeReceiptRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'type_receipt_category_id.required' => 'El campo categoría es obligatorio.',
-            'type_receipt_category_id.integer' => 'El campo categoría debe ser un número entero.',
-            'type_receipt_category_id.min' => 'El campo categoría no puede ser menor que 0.',
-            'type_receipt_category_id.max' => 'El campo categoría no puede ser mayor que ' . (count(\App\Models\TypeReceipt::$categories) - 1) . '.',
+            'receipt_category.required' => 'El campo categoría es obligatorio.',
+            'receipt_category.in' => 'El campo categoría debe ser uno de los siguientes valores: ' . implode(', ', \App\Models\TypeReceipt::$categories) . '.',
             'name.required' => 'El campo nombre es obligatorio.',
             'name.string' => 'El campo nombre debe ser una cadena de texto.',
             'name.max' => 'El campo nombre no puede tener más de 255 caracteres.',

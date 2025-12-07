@@ -8,11 +8,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PrintJobRequest extends Model
 {
-    use HasFactory, SoftDeletes;
-
+    use SoftDeletes, HasFactory;
+    protected $table = 'print_job_requests';
     protected $fillable = [
         'customer_id',
-        'category_id',
         'type_receipt_id',
         'name',
         'file_path',
@@ -25,9 +24,9 @@ class PrintJobRequest extends Model
         'paper_type',
         'quantity',
         'status',
-        'price',
-        'estimated_date',
         'reason_rejection',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [
@@ -80,13 +79,12 @@ class PrintJobRequest extends Model
         3 => 'cartulina',
     ];
 
-    public static $statusLabels = [
-        self::STATUS_PENDING => 'Pendiente',
-        self::STATUS_WAITING_ACCEPTANCE => 'Esperando aceptación',
-        self::STATUS_ACCEPTED => 'Aceptada',
-        self::STATUS_IN_PROGRESS => 'En proceso',
-        self::STATUS_COMPLETED => 'Completada',
-        self::STATUS_REJECTED => 'Rechazada',
+    public static $status = [
+        1 => 'Solicitada',
+        2 => 'Esperando aceptacion',
+        3 => 'En proceso',
+        4 => 'Terminada',
+        5 => 'Rechazada'
     ];
 
     public function customer()

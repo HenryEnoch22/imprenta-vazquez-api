@@ -15,22 +15,16 @@ class TypeReceiptController extends Controller
     public function index()
     {
         $typesReceipts = TypeReceipt::all();
-        $typesReceipts->each(function ($typeReceipt) {
-            $typeReceipt->category = TypeReceipt::$categories[$typeReceipt->type_receipt_category_id] ?? 'Sin categoría';
-        });
+
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
 
         return response()->json([
             'data' => $typesReceipts
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -39,66 +33,95 @@ class TypeReceiptController extends Controller
     {
         $data = $request->validated();
 
-        $typeReceipt = TypeReceipt::create([
-            'type_receipt_category_id' => $data['type_receipt_category_id'],
+        if(auth()->user() && !auth()->user()->is_admin){
+            return response()->json(['message' => 'Usuario no autorizado'], 403);
+        }
+
+        TypeReceipt::create([
+            'receipt_category' => $data['receipt_category'],
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
         ]);
 
         return response()->json([
             'message' => 'Tipo de comprobante creado exitosamente.',
-            'data' => $typeReceipt
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($typeReceipt)
+    public function show($typeReceiptId)
     {
-        return response()->json([
-            'data' => TypeReceipt::findOrFail($typeReceipt)
-        ], 200);
+        try{
+            $typeReceipt = TypeReceipt::findOrfail($typeReceiptId);
+            if(auth()->user() && !auth()->user()->is_admin){
+                return response()->json(['message' => 'Usuario no autorizado'], 403);
+            }
+            return response()->json([
+                'data' => $typeReceipt
+            ], 200);
+
+        }catch (\Exception $e){
+            return response()->json([
+                'message' => 'Tipo de comprobante no encontrado.'
+            ], 404);
+        }
+
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(TypeReceipt $typeReceipt)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateTypeReceiptRequest $request, $typeReceipt)
     {
-        $data = $request->validated();
+        try{
+            $data = $request->validated();
 
-        $typeReceiptModel = TypeReceipt::findOrFail($typeReceipt);
-        $typeReceiptModel->update([
-            'type_receipt_category_id' => $data['type_receipt_category_id'],
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-        ]);
+            if(auth()->user() && !auth()->user()->is_admin){
+                return response()->json(['message' => 'Usuario no autorizado'], 403);
+            }
 
-        return response()->json([
-            'message' => 'Tipo de comprobante actualizado exitosamente.',
-            'data' => $typeReceiptModel
-        ], 200);
+            $typeReceiptModel = TypeReceipt::findOrFail($typeReceipt);
+            $typeReceiptModel->update([
+                'receipt_category' => $data['receipt_category'],
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+            ]);
+
+            return response()->json([
+                'message' => 'Tipo de comprobante actualizado exitosamente.',
+            ], 200);
+
+        }catch (\Exception $e){
+            return response()->json([
+                'message' => 'Tipo de comprobante no encontrado.'
+            ], 404);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($typeReceipt)
+    public function destroy($typeReceiptId)
     {
-        $typeReceipt = TypeReceipt::findOrFail($typeReceipt);
-        $typeReceipt->delete();
+        try{
+            if(auth()->user() && !auth()->user()->is_admin){
+                return response()->json(['message' => 'Usuario no autorizado'], 403);
+            }
 
-        return response()->json([
-            'message' => 'Tipo de comprobante eliminado exitosamente.'
-        ], 200);
+            $typeReceipt = TypeReceipt::findOrFail($typeReceiptId);
+            $typeReceipt->delete();
+
+            return response()->json([
+                'message' => 'Tipo de comprobante eliminado exitosamente.'
+            ], 200);
+
+        }catch (\Exception $e){
+            return response()->json([
+                'message' => 'Tipo de comprobante no encontrado.'
+            ], 404);
+        }
     }
 }
