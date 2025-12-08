@@ -98,6 +98,11 @@ class PrintJobRequest extends Model
         return $this->hasOne(TypeReceipt::class, 'id', 'type_receipt_id');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(PrintJobPayment::class, 'print_job_request_id');
+    }
+
     /**
      * Verifica si el cliente puede editar esta solicitud
      */
@@ -106,7 +111,8 @@ class PrintJobRequest extends Model
         return in_array($this->status, [
             self::STATUS_PENDING,
             self::STATUS_WAITING_ACCEPTANCE,
-            self::STATUS_REJECTED
+            self::STATUS_REJECTED,
+            self::STATUS_DECLINED
         ]);
     }
 
