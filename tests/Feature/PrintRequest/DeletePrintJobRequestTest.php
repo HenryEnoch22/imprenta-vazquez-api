@@ -21,10 +21,7 @@ class DeletePrintJobRequestTest extends TestCase
         ]);
 
         // Creamos una solicitud de impresión
-        $printJob = PrintJobRequest::factory()->create();
-        \Log::info([
-            'printJob before delete' => $printJob,
-        ]);
+        $printJob = PrintJobRequest::factory()->create();;
 
         Sanctum::actingAs($user, ['*']);
 

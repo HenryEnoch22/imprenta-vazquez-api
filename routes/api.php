@@ -18,7 +18,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::ApiResource('print-jobs', \App\Http\Controllers\PrintJobRequestController::class);
     Route::get('print-jobs/{id}/payments', [\App\Http\Controllers\PrintJobPaymentController::class, 'paymentsByPrintJobRequest']);
     Route::post('print-jobs/{id}/change-status', [\App\Http\Controllers\PrintJobRequestController::class, 'changeStatus']);
-    Route::post('print-jobs/reject', [\App\Http\Controllers\PrintJobRequestController::class, 'reject']);
 });
 
 

@@ -72,7 +72,7 @@ class PrintJobRequestController extends Controller
     public function show($printJobRequest)
     {
         $printJobRequest = PrintJobRequest::findOrFail($printJobRequest);
-        $printJobRequest->load(['customer', 'typeReceipt']);
+        $printJobRequest->load(['customer', 'typeReceipt', 'payments']);
         $printJobRequest->file_path = Storage::disk('print-files')->url($printJobRequest->file_path);
 
         return response()->json($printJobRequest, 200);
@@ -112,7 +112,6 @@ class PrintJobRequestController extends Controller
         if (in_array($printJob->status, [PrintJobRequest::STATUS_REJECTED, PrintJobRequest::STATUS_DECLINED])) {
             $printJob->status = PrintJobRequest::STATUS_PENDING;
             $printJob->reason_rejection = null;
-            $printJob->reason_declined = null;
         }
 
         // Manejar archivo si se subió uno nuevo
