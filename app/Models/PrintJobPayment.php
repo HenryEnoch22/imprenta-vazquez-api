@@ -8,15 +8,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class PrintJobPayment extends Model
 {
     use SoftDeletes;
-    protected $table = 'print_job_payments';
+
+    protected $table = 'print_job_payment';
+
     protected $fillable = [
         'print_job_request_id',
         'payment_method',
         'amount',
         'paid_at',
         'file_path',
-        'created_at',
-        'updated_at',
+    ];
+
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'paid_at' => 'datetime',
     ];
 
     public static $paymentMethods = [
@@ -27,6 +32,6 @@ class PrintJobPayment extends Model
 
     public function printJobRequest()
     {
-        $this->belongsTo(PrintJobRequest::class, 'print_job_request_id');
+        return $this->belongsTo(PrintJobRequest::class, 'print_job_request_id');
     }
 }

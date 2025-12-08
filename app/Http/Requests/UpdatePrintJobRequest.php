@@ -6,17 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePrintJobRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -25,7 +20,6 @@ class UpdatePrintJobRequest extends FormRequest
             'customer_id' => 'nullable|exists:customers,id',
             'type_receipt_id' => 'nullable|exists:type_receipts,id',
             'name' => 'nullable|string|max:255',
-
             'file_path' => 'nullable|file|max:10240|mimes:pdf',
             'description' => 'nullable|string',
 
@@ -36,27 +30,26 @@ class UpdatePrintJobRequest extends FormRequest
             'copies_colors.*' => 'integer',
 
             'tint_colors' => 'nullable|array',
-            'tint_colors.*' => 'string',
-
+            'tint_colors.*' => 'integer',
             'paper_size' => 'nullable|integer',
             'paper_type' => 'nullable|integer',
             'quantity' => 'nullable|integer|min:1',
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [
-            'customer_id.required' => 'El campo cliente es obligatorio.',
             'customer_id.exists' => 'El cliente seleccionado no existe.',
             'type_receipt_id.exists' => 'El tipo de comprobante seleccionado no existe.',
-            'type_receipt_id.required' => 'El campo tipo de comprobante es obligatorio.',
-            'name.required' => 'El campo nombre es obligatorio.',
+            'name.string' => 'El campo nombre debe ser una cadena de texto.',
+            'name.max' => 'El campo nombre no debe superar los 255 caracteres.',
+            'file_path.file' => 'El archivo debe ser un archivo válido.',
+            'file_path.max' => 'El archivo no debe superar los 10 MB.',
+            'file_path.mimes' => 'El archivo debe ser un PDF.',
+            'folio.required_if' => 'El campo folio es obligatorio cuando el tipo de recibo es Impresión.',
+            'copies_number.required_if' => 'El campo número de copias es obligatorio cuando el tipo de recibo es Impresión.',
+            'copies_colors.required_if' => 'El campo colores de copias es obligatorio cuando el tipo de recibo es Impresión.',
         ];
     }
 }

@@ -17,11 +17,14 @@ class DeletePrintJobRequestTest extends TestCase
     {
         // Usuario autenticado (puede ser admin o no, tu método no valida roles)
         $user = User::factory()->create([
-            'is_admin' => 1,
+            'is_admin' => true,
         ]);
 
         // Creamos una solicitud de impresión
         $printJob = PrintJobRequest::factory()->create();
+        \Log::info([
+            'printJob before delete' => $printJob,
+        ]);
 
         Sanctum::actingAs($user, ['*']);
 

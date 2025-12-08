@@ -6,17 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StorePrintJobRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -25,7 +20,6 @@ class StorePrintJobRequest extends FormRequest
             'customer_id' => 'required|exists:customers,id',
             'type_receipt_id' => 'required|exists:type_receipts,id',
             'name' => 'required|string|max:255',
-
             'file_path' => 'required|file|max:10240|mimes:pdf',
             'description' => 'nullable|string',
 
@@ -36,20 +30,13 @@ class StorePrintJobRequest extends FormRequest
             'copies_colors.*' => 'integer',
 
             'tint_colors' => 'required|array',
-            'tint_colors.*' => 'string',
-
+            'tint_colors.*' => 'integer',
             'paper_size' => 'required|integer',
             'paper_type' => 'required|integer',
             'quantity' => 'required|integer|min:1',
         ];
     }
 
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [
@@ -64,14 +51,12 @@ class StorePrintJobRequest extends FormRequest
             'file_path.file' => 'El archivo debe ser un archivo válido.',
             'file_path.max' => 'El archivo no debe superar los 10 MB.',
             'file_path.mimes' => 'El archivo debe ser un PDF.',
-            'folio.required' => 'El campo folio es obligatorio.',
-            'paper_size.required' => 'El campo tamaño de papel es obligatorio.',
-            'copies_number.required' => 'El campo número de copias es obligatorio.',
-            'paper_type.required' => 'El campo tipo de papel es obligatorio.',
-            'quantity.required' => 'El campo cantidad es obligatorio.',
             'folio.required_if' => 'El campo folio es obligatorio cuando el tipo de recibo es Impresión.',
+            'paper_size.required' => 'El campo tamaño de papel es obligatorio.',
             'copies_number.required_if' => 'El campo número de copias es obligatorio cuando el tipo de recibo es Impresión.',
             'copies_colors.required_if' => 'El campo colores de copias es obligatorio cuando el tipo de recibo es Impresión.',
+            'paper_type.required' => 'El campo tipo de papel es obligatorio.',
+            'quantity.required' => 'El campo cantidad es obligatorio.',
             'tint_colors.required' => 'El campo colores de tinta es obligatorio.',
         ];
     }

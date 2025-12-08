@@ -22,7 +22,10 @@ return new class extends Migration
             $table->json('tint_colors')->nullable()->after('copies_colors');
             $table->integer('paper_type')->after('tint_colors');
             $table->integer('quantity')->after('paper_type');
-            $table->integer('status')->default(1)->after('quantity');
+            $table->enum('status', ['pending','declined','waiting_acceptance', 'accepted', 'in_progress', 'completed', 'rejected'])->default('waiting_acceptance')->after('quantity');
+            $table->decimal('price', 8, 2)->nullable()->after('status');
+            $table->boolean('is_paid')->default(false)->after('price');
+            $table->date('estimated_date')->nullable()->after('is_paid');
             $table->softDeletes()->after('updated_at');
         });
     }
@@ -34,7 +37,7 @@ return new class extends Migration
     {
         Schema::table('print_job_requests', function (Blueprint $table) {
             $table->dropColumn([
-                'category_id',
+                'name',
                 'file_path',
                 'description',
                 'folio',
@@ -45,6 +48,9 @@ return new class extends Migration
                 'paper_type',
                 'quantity',
                 'status',
+                'price',
+                'is_paid',
+                'estimated_date',
                 'deleted_at',
             ]);
         });

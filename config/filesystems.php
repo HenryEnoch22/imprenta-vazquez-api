@@ -68,6 +68,14 @@ return [
             'throw' => false,
         ],
 
+        'payment-files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/payment-files'),
+            'url' => env('APP_URL').'/payment-files',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
     ],
 
     /*
@@ -84,6 +92,7 @@ return [
     'links' => [
         public_path('storage') => storage_path('app/public'),
         public_path('print-files') => storage_path('app/print-files'),
+        public_path('payment-files') => storage_path('app/payment-files'),
     ],
 
 ];
