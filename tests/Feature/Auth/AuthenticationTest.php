@@ -10,7 +10,7 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_users_can_authenticate(): void
     {
         $user = User::factory()->create([
             'is_admin' => 1
