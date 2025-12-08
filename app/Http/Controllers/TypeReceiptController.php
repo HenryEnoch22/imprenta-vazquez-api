@@ -16,10 +16,6 @@ class TypeReceiptController extends Controller
     {
         $typesReceipts = TypeReceipt::all();
 
-        if(auth()->user() && !auth()->user()->is_admin){
-            return response()->json(['message' => 'Usuario no autorizado'], 403);
-        }
-
         return response()->json([
             'data' => $typesReceipts
         ], 200);

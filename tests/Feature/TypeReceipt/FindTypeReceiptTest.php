@@ -33,28 +33,6 @@ class FindTypeReceiptTest extends TestCase
             ->assertJsonCount(3, 'data'); // Asegurarse de que se devuelven 3 registros
     }
 
-    public function test_non_admin_cannot_get_all_type_receipts(): void
-    {
-        $customerUser = User::factory()->create([
-            'is_admin' => 0,
-        ]);
-
-        // Crear algunos TypeReceipt de ejemplo
-        TypeReceipt::factory()->count(3)->create();
-
-        // Autenticar como admin
-        Sanctum::actingAs($customerUser, ['*']);
-
-        // Hacer la solicitud GET a la ruta de type-receipts
-        $response = $this->getJson('api/type-receipts');
-
-        // Verificar la respuesta
-        $response->assertStatus(403)
-            ->assertJson([
-                'message' => 'Usuario no autorizado',
-            ]);
-    }
-
     public function test_admin_can_get_type_receipt_by_id(): void
     {
         $adminUser = User::factory()->create([

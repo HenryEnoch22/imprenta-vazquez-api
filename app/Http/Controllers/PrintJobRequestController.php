@@ -7,6 +7,7 @@ use App\Http\Requests\StorePrintJobRequest;
 use App\Http\Requests\UpdatePrintJobRequest;
 use App\Models\PrintJobPayment;
 use App\Models\PrintJobRequest;
+use App\Models\TypeReceipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +54,24 @@ class PrintJobRequestController extends Controller
             );
             $validated['file_path'] = $path;
         }
+
+        $typeReceipt = TypeReceipt::findOrFail($validated['type_receipt_id']);
+        if ($typeReceipt->receipt_category == TypeReceipt::CATEGORY_PRINTING) {
+            $validator = validator()->make($validated, [
+                'folio' => 'required',
+                'copies_number' => 'required',
+                'copies_colors' => 'required',
+            ], [
+                'folio.required' => 'El campo folio es obligatorio para tipos de comprobante de impresión.',
+                'copies_number.required' => 'El campo número de copias es obligatorio para tipos de comprobante de impresión.',
+                'copies_colors.required' => 'El campo colores de copias es obligatorio para tipos de comprobante de impresión.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => $validator->errors()->first()], 422);
+            }
+        }
+
 
         $printJob = PrintJobRequest::create(
             array_merge($validated, [
@@ -108,6 +127,23 @@ class PrintJobRequestController extends Controller
             ], 400);
         }
 
+        $typeReceipt = TypeReceipt::findOrFail($printJob->type_receipt_id);
+        if ($typeReceipt->receipt_category == TypeReceipt::CATEGORY_PRINTING) {
+            $validator = validator()->make($validated, [
+                'folio' => 'required',
+                'copies_number' => 'required',
+                'copies_colors' => 'required',
+            ], [
+                'folio.required' => 'El campo folio es obligatorio para tipos de comprobante de impresión.',
+                'copies_number.required' => 'El campo número de copias es obligatorio para tipos de comprobante de impresión.',
+                'copies_colors.required' => 'El campo colores de copias es obligatorio para tipos de comprobante de impresión.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['message' => $validator->errors()->first()], 422);
+            }
+        }
+
         // Si estaba rechazada o declinada, al editarla pasa a pending de nuevo
         if (in_array($printJob->status, [PrintJobRequest::STATUS_REJECTED, PrintJobRequest::STATUS_DECLINED])) {
             $printJob->status = PrintJobRequest::STATUS_PENDING;
@@ -129,9 +165,8 @@ class PrintJobRequestController extends Controller
         }
 
         // Actualizar solo los campos permitidos
-        $printJob->update(array_filter([
+        $printJob->update([
             'name' => $validated['name'] ?? $printJob->name,
-            'type_receipt_id' => $validated['type_receipt_id'] ?? $printJob->type_receipt_id,
             'description' => $validated['description'] ?? $printJob->description,
             'folio' => $validated['folio'] ?? $printJob->folio,
             'paper_size' => $validated['paper_size'] ?? $printJob->paper_size,
@@ -141,7 +176,7 @@ class PrintJobRequestController extends Controller
             'paper_type' => $validated['paper_type'] ?? $printJob->paper_type,
             'quantity' => $validated['quantity'] ?? $printJob->quantity,
             'file_path' => $validated['file_path'] ?? $printJob->file_path,
-        ]));
+        ]);
 
         return response()->json([
             'message' => 'Solicitud actualizada exitosamente.',
