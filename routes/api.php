@@ -3,6 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/greeting', function () {
+    return response()->json(['message' => 'Hola, esto si es un saludo?'], 200);
+});
+
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     $user = $request->user();
     if (!$user->is_admin) {
