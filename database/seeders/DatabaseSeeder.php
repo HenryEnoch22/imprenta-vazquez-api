@@ -28,21 +28,16 @@ class DatabaseSeeder extends Seeder
             'is_admin' => true,
         ]);
 
-        DB::table('receipt_categories')->insert([
-            ['id' => 1, 'name' => 'Impresión', 'description' => 'Categoría de recibos para servicios de impresión', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'name' => 'Varios', 'description' => 'Categoría de recibos para servicios varios', 'created_at' => now(), 'updated_at' => now()],
-        ]);
-
         TypeReceipt::create([
             'id' => 1,
-            'receipt_category_id' => 1,
+            'receipt_category' => 1,
             'name' => 'Impresion',
             'description' => 'Impresion',
         ]);
 
         TypeReceipt::create([
             'id' => 2,
-            'receipt_category_id' => 2,
+            'receipt_category' => 2,
             'name' => 'Varios',
             'description' => 'Varios',
         ]);

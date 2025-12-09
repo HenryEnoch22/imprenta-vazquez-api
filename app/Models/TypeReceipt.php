@@ -22,4 +22,12 @@ class TypeReceipt extends Model
         'Impresión',
         'Varios',
     ];
+
+    public const CATEGORY_PRINTING = 'Impresión';
+    public const CATEGORY_MISC = 'Varios';
+
+    public const CATEGORIES = [
+        self::CATEGORY_PRINTING,
+        self::CATEGORY_MISC,
+    ];
 }

@@ -18,15 +18,14 @@ class UpdatePrintJobRequest extends FormRequest
     {
         return [
             'customer_id' => 'nullable|exists:customers,id',
-            'type_receipt_id' => 'nullable|exists:type_receipts,id',
             'name' => 'nullable|string|max:255',
             'file_path' => 'nullable|file|max:10240|mimes:pdf',
             'description' => 'nullable|string',
 
             // Condicionales
-            'folio' => 'required_if:type_receipt_id,1|nullable|string|max:100',
-            'copies_number' => 'required_if:type_receipt_id,1|nullable|integer|min:1',
-            'copies_colors' => 'required_if:type_receipt_id,1|nullable|array',
+            'folio' => 'nullable|string|max:100',
+            'copies_number' => 'nullable|integer|min:1',
+            'copies_colors' => 'nullable|array',
             'copies_colors.*' => 'integer',
 
             'tint_colors' => 'nullable|array',
@@ -41,15 +40,11 @@ class UpdatePrintJobRequest extends FormRequest
     {
         return [
             'customer_id.exists' => 'El cliente seleccionado no existe.',
-            'type_receipt_id.exists' => 'El tipo de comprobante seleccionado no existe.',
             'name.string' => 'El campo nombre debe ser una cadena de texto.',
             'name.max' => 'El campo nombre no debe superar los 255 caracteres.',
             'file_path.file' => 'El archivo debe ser un archivo válido.',
             'file_path.max' => 'El archivo no debe superar los 10 MB.',
             'file_path.mimes' => 'El archivo debe ser un PDF.',
-            'folio.required_if' => 'El campo folio es obligatorio cuando el tipo de recibo es Impresión.',
-            'copies_number.required_if' => 'El campo número de copias es obligatorio cuando el tipo de recibo es Impresión.',
-            'copies_colors.required_if' => 'El campo colores de copias es obligatorio cuando el tipo de recibo es Impresión.',
         ];
     }
 }
