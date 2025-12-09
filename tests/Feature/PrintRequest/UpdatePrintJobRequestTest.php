@@ -99,7 +99,9 @@ class UpdatePrintJobRequestTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $typeReceipt = TypeReceipt::factory()->create();
+        $typeReceipt = TypeReceipt::factory()->create([
+            'receipt_category' => TypeReceipt::CATEGORY_MISC, // O la categoría que no requiera campos extra
+        ]);
 
         // Archivo original almacenado
         Storage::disk('print-files')->put('original.pdf', 'contenido');
@@ -120,7 +122,7 @@ class UpdatePrintJobRequestTest extends TestCase
             'file_path' => $newFile,
         ];
 
-        $response = $this->putJson(
+        $response = $this->put(
             route('print-jobs.update', $printJob->id),
             $payload
         );
