@@ -31,7 +31,9 @@ class UpdatePrintJobRequestTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $typeReceipt = TypeReceipt::factory()->create();
+        $typeReceipt = TypeReceipt::factory()->create([
+            'receipt_category' => TypeReceipt::CATEGORY_MISC,
+        ]);
 
         // Archivo original
         Storage::disk('print-files')->put('original.pdf', 'contenido');
