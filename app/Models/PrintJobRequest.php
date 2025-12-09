@@ -25,6 +25,7 @@ class PrintJobRequest extends Model
         'quantity',
         'status',
         'reason_rejection',
+        'reason_declined',
         'created_at',
         'updated_at',
     ];
