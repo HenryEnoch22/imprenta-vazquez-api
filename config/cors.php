@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://72.60.71.139'],
+    'allowed_origins' => ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://imprenta-vazquez-next-js-7u8h.vercel.app/'],
 
     'allowed_headers' => ['*'],
 
